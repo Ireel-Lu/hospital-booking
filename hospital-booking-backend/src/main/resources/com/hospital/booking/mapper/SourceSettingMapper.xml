@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hospital.booking.mapper.SourceSettingMapper">
+
+    <!-- 获取医生某天所有时段号源 -->
+    <select id="getDoctorSettings" resultType="java.util.LinkedHashMap">
+        SELECT
+            ss.id,
+            ss.doctor_id        AS doctorId,
+            ss.date,
+            ss.time_slot         AS timeSlot,
+            ss.total_quantity     AS totalQuantity,
+            ss.remaining_quantity AS remainingQuantity,
+            ss.status,
+            CASE
+                WHEN ss.remaining_quantity > 0 THEN 'available'
+                ELSE 'full'
+                END                  AS slotStatus
+        FROM source_setting ss
+        WHERE ss.doctor_id = #{doctorId}
+          AND ss.date = #{date}
+          AND ss.status = 1
+        ORDER BY
+            FIELD(ss.time_slot,
+                  '08:00-09:00','09:00-10:00','10:00-11:00',
+                  '11:00-12:00','14:00-15:00','15:00-16:00','16:00-17:00')
+    </select>
+
+</mapper>
