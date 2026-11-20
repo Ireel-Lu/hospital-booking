@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hospital.mapper.MedicalRecordMapper">
+
+    <select id="getDoctorRecords" parameterType="map" resultType="java.util.Map">
+        SELECT
+        mr.*,
+        u.real_name AS patient_name,
+        u.phone AS patient_phone,
+        a.appointment_date,
+        a.time_slot
+        FROM medical_record mr
+        LEFT JOIN appointment a ON mr.appointment_id = a.id
+        LEFT JOIN user u ON mr.patient_id = u.id
+        WHERE mr.doctor_id = #{doctorId}
+        <if test="startDate != null">
+            AND mr.visit_time >= #{startDate}
+        </if>
+        <if test="endDate != null">
+            AND mr.visit_time &lt;= #{endDate}
+        </if>
+        ORDER BY mr.visit_time DESC
+    </select>
+<!--    XML 解析器看到 < 时，会以为后面要开始一个新标签（比如 <if>、</select>），
+        但 = 不是合法的标签名，所以报"应为标记名称"
+        方法一：把 < 转义成 &lt;
+        方法二：用 CDATA 包裹，里面的内容 XML 不解析<![CDATA[ <= ]]> #{endDate}-->
+
+</mapper>
